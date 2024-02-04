@@ -152,6 +152,12 @@
             var optionsWrap = $(instance.element).siblings('#ms-list-'+ instance.listNumber +'.ms-options-wrap').find('> .ms-options');
             var optionsList = optionsWrap.find('> ul');
 
+            //not part of the plugin 
+            var width = (typeof instance.options.width !== "undefined") ? instance.options.width : null;            
+            if(width){
+                $(instance.element).next('.ms-options-wrap').css('width', width);
+            }
+
             // don't show checkbox (add class for css to hide checkboxes)
             if( !instance.options.showCheckbox ) {
                 optionsWrap.addClass('hide-checkbox');
@@ -177,6 +183,16 @@
             else {
                 // cacl default maxHeight
                 var maxHeight = ($(window).height() - optionsWrap.offset().top + $(window).scrollTop() - 20);
+            }
+
+            // Add a "clear all" button outside the plugin
+            if(instance.options.allowClear){
+                placeholder.after(
+                    $('<span class="clear-all">&times;</span>').on('click',function(){
+                        instance.reset();
+                        $(instance.element).trigger('change');
+                    })
+                );
             }
 
             // maxHeight cannot be less than options.minHeight
@@ -289,7 +305,7 @@
 
             // add placeholder copy
             if( instance.options.texts.placeholder ) {
-                placeholder.find('span').text( instance.options.texts.placeholder );
+                placeholder.find('span').html( instance.options.texts.placeholder ); //not part of plugin
             }
 
             // add search box
@@ -498,7 +514,6 @@
 
         /* LOAD SELECT OPTIONS */
         loadOptions: function( options, overwrite, updateSelect ) {
-            // console.log( options );
             overwrite    = (typeof overwrite == 'boolean') ? overwrite : true;
             updateSelect = (typeof updateSelect == 'boolean') ? updateSelect : true;
 
@@ -816,6 +831,7 @@
             var instance       = this;
             var select         = $(instance.element);
             var selectVals     = select.val() ? select.val() : [];
+            var clearAllBtn    = $(instance.element).next('.ms-options-wrap').find('.clear-all'); //not part of the plugin
             var placeholder    = select.siblings('#ms-list-'+ instance.listNumber +'.ms-options-wrap').find('> button:first-child');
             var placeholderTxt = placeholder.find('span');
             var optionsWrap    = select.siblings('#ms-list-'+ instance.listNumber +'.ms-options-wrap').find('> .ms-options');
@@ -837,12 +853,23 @@
                 }
 
                 selOpts.push(
-                    $.trim( select.find('option[value="'+ instance._escapeSelector( selectVals[ key ] ) +'"]').text() )
+                    $.trim( $("<div>").html(select.find('option[value="'+ instance._escapeSelector( selectVals[ key ] ) +'"]').text()).text() ) //not part of the plugin
                 );
 
                 if( selOpts.length >= instance.options.maxPlaceholderOpts ) {
                     break;
                 }
+            }
+
+
+            // Hide / Show the "clear all" button - not part of the plugin
+            if(selectVals.length){
+                clearAllBtn.show();
+                placeholder.removeClass('ms-none-selected');
+            }
+            else{
+                clearAllBtn.hide();
+                placeholder.addClass('ms-none-selected');
             }
 
             // UPDATE PLACEHOLDER TEXT WITH OPTIONS SELECTED
@@ -862,7 +889,7 @@
 
             // replace placeholder text
             if( !selOpts.length ) {
-                placeholderTxt.text( instance.options.texts.placeholder );
+                placeholderTxt.text( instance.options.texts.placeholder ); //not part of plugin
             }
             // if copy is larger than button width use "# selected"
             else if( instance.options.replacePlaceholderText && ((placeholderTxt.width() > placeholder.width()) || (selOpts.length != selectVals.length)) ) {
@@ -873,11 +900,11 @@
         // Add option to the custom dom list
         _addOption: function( container, option ) {
             var instance = this;
-            var optionNameText = $('<div/>').html( option.name ).text();
+            var optionNameText = $('<div/>').html( option.name ).html();
 
             var thisOption = $('<label/>', {
                 for : 'ms-opt-'+ msOptCounter
-            }).text( optionNameText );
+            }).html( optionNameText );
 
             var thisCheckbox = $('<input>', {
                 type : 'checkbox',
