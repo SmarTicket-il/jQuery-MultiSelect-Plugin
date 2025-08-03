@@ -1,6 +1,6 @@
 /**
  * Display a nice easy to use multiselect list
- * @Version: 2.4.22
+ * @Version: 2.4.24
  * @Author: Patrick Springstubbe
  * @Contact: @JediNobleclem
  * @Website: springstubbe.us
@@ -62,6 +62,7 @@
         maxWidth               : null,  // maximum width of option overlay (or selector)
         maxPlaceholderWidth    : null,  // maximum width of placeholder button
         maxPlaceholderOpts     : 10,    // maximum number of placeholder options to show until "# selected" shown instead
+        showAllPlaceholderOpts : false, // always show all the selected options
         showCheckbox           : true,  // display the checkbox to the user
         checkboxAutoFit        : false,  // auto calc checkbox padding
         optionAttributes       : [],    // attributes to copy to the checkbox from the option element
@@ -138,7 +139,7 @@
             var instance = this;
 
             // make sure this is a select list and not loaded
-            if( (instance.element.nodeName != 'SELECT') || $(instance.element).hasClass('jqmsLoaded') ) {
+            if( (instance.element.nodeName.toUpperCase() != 'SELECT') || $(instance.element).hasClass('jqmsLoaded') ) {
                 return true;
             }
 
@@ -426,7 +427,7 @@
             // add options to wrapper
             var options = [];
             $(instance.element).children().each(function(){
-                if( this.nodeName == 'OPTGROUP' ) {
+                if( this.nodeName.toUpperCase() == 'OPTGROUP' ) {
                     var groupOptions = [];
 
                     $(this).children('option').each(function(){
@@ -452,7 +453,7 @@
                         options: groupOptions
                     });
                 }
-                else if( this.nodeName == 'OPTION' ) {
+                else if( this.nodeName.toUpperCase() == 'OPTION' ) {
                     var thisOptionAtts = {};
                     for( var i = 0; i < instance.options.optionAttributes.length; i++ ) {
                         var thisOptAttr = instance.options.optionAttributes[ i ];
@@ -892,7 +893,7 @@
                 placeholderTxt.text( instance.options.texts.placeholder ); //not part of plugin
             }
             // if copy is larger than button width use "# selected"
-            else if( instance.options.replacePlaceholderText && ((placeholderTxt.width() > placeholder.width()) || (selOpts.length != selectVals.length)) ) {
+            else if( !instance.options.showAllPlaceholderOpts && instance.options.replacePlaceholderText && ((placeholderTxt.width() > placeholder.width()) || (selOpts.length != selectVals.length)) ) {
                 placeholderTxt.text( selectVals.length + instance.options.texts.selectedOptions );
             }
         },
